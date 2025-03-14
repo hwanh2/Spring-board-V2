@@ -17,7 +17,7 @@ public class Board {
     private String title;
     private String content;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)  // 필요에 따라 추가
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "member_id", referencedColumnName = "id", nullable = false)
     private Member member;
 

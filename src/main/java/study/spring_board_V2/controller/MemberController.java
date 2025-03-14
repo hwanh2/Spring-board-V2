@@ -5,8 +5,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import study.spring_board_V2.domain.Board;
 import study.spring_board_V2.domain.Member;
 import study.spring_board_V2.dto.MemberForm;
+import study.spring_board_V2.service.BoardService;
 import study.spring_board_V2.service.MemberService;
 
 import java.util.List;
@@ -15,9 +17,11 @@ import java.util.List;
 @RequestMapping("/members")
 public class MemberController {
     private final MemberService memberService;
+    private final BoardService boardService;
 
-    public MemberController(MemberService memberService) {
+    public MemberController(MemberService memberService, BoardService boardService) {
         this.memberService = memberService;
+        this.boardService = boardService;
     }
 
     //회원가입
@@ -61,6 +65,17 @@ public class MemberController {
     @GetMapping("/list")
     public List<Member> list(){
         return memberService.findMembers();
+    }
+
+    @GetMapping("/mypage/boards")
+    public List<Board> myPageBoards(HttpSession session) {
+        Member member = (Member) session.getAttribute("member");
+
+        if (member == null) {
+            throw new IllegalStateException("로그인 상태가 아닙니다.");
+        }
+
+        return boardService.findByMember(member); // 멤버 객체의 게시글들을 반환
     }
 
 }
