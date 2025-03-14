@@ -37,7 +37,7 @@ class JpaMemberRepositoryTest {
         // given
         Member member = new Member();
         member.setName("testUser");
-        memberRepository.Save(member);
+        memberRepository.save(member);
         em.flush(); // 영속성 컨텍스트 반영
 
         // when
@@ -53,7 +53,7 @@ class JpaMemberRepositoryTest {
         // given
         Member member = new Member();
         member.setName("duplicateName");
-        memberRepository.Save(member);
+        memberRepository.save(member);
         em.flush();
 
         // when
@@ -81,8 +81,8 @@ class JpaMemberRepositoryTest {
         Member member2 = new Member();
         member2.setName("User2");
 
-        memberRepository.Save(member1);
-        memberRepository.Save(member2);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
         em.flush();
 
         // when
