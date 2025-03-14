@@ -1,4 +1,4 @@
-package study.spring_board_V2.Service;
+package study.spring_board_V2.service;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -7,7 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import study.spring_board_V2.domain.Member;
 import study.spring_board_V2.repository.MemberRepository;
-import study.spring_board_V2.service.MemberService;
 
 @SpringBootTest
 @Transactional

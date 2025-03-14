@@ -25,7 +25,7 @@ public class MemberService {
             throw new IllegalStateException("이미 존재하는 이름입니다.");
         }
         // 회원 저장
-        memberRepository.Save(member);
+        memberRepository.save(member);
         return member.getId();
     }
 
