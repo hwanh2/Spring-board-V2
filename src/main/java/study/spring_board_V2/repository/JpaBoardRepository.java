@@ -35,4 +35,19 @@ public class JpaBoardRepository implements BoardRepository {
                 .setParameter("member", member)
                 .getResultList();
     }
+
+    @Override
+    public Board findById(Long id) {
+        Board board = em.find(Board.class,id);
+        return board;
+    }
+
+    // 게시글 삭제
+    @Override
+    public void deleteById(Long id) {
+        Board board = em.find(Board.class, id);
+        if (board != null) {
+            em.remove(board); // 해당 게시글 삭제
+        }
+    }
 }

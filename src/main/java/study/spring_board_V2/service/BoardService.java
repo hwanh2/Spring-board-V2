@@ -31,4 +31,13 @@ public class BoardService {
     public List<Board> findByMember(Member member) {
         return boardRepository.findByMember(member); // member에 해당하는 게시글들을 반환
     }
+
+    public Board findById(Long id){
+        return boardRepository.findById(id);
+    }
+
+    @Transactional
+    public void deleteById(Long boardId) {
+        boardRepository.deleteById(boardId);
+    }
 }
