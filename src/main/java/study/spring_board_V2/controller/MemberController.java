@@ -38,6 +38,25 @@ public class MemberController {
         return member;
     }
 
+    //회원정보
+    @GetMapping("/member")
+    public Member member(HttpSession session){
+        Member member = (Member) session.getAttribute("member");
+
+        if (member == null) {
+            throw new IllegalStateException("로그인 상태가 아닙니다.");
+        }
+
+        return member;
+    }
+
+    // 로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpSession session) {
+        session.invalidate(); // 세션 삭제
+        return ResponseEntity.ok("로그아웃되었습니다.");
+    }
+
     //회원목록
     @GetMapping("/list")
     public List<Member> list(){
