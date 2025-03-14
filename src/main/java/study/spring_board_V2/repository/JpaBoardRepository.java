@@ -1,8 +1,6 @@
 package study.spring_board_V2.repository;
 
-import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import study.spring_board_V2.domain.Board;
 import study.spring_board_V2.domain.Member;

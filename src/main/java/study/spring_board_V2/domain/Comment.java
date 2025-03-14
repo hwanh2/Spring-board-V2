@@ -14,7 +14,7 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String comment;
+    private String content;
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "board_id", referencedColumnName = "id", nullable = false)
