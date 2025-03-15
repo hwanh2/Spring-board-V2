@@ -3,12 +3,15 @@ package study.spring_board_V2.controller;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import study.spring_board_V2.domain.Board;
+import study.spring_board_V2.domain.Comment;
 import study.spring_board_V2.domain.Member;
 import study.spring_board_V2.dto.MemberForm;
 import study.spring_board_V2.service.BoardService;
+import study.spring_board_V2.service.CommentService;
 import study.spring_board_V2.service.MemberService;
 
 import java.util.List;
@@ -18,10 +21,13 @@ import java.util.List;
 public class MemberController {
     private final MemberService memberService;
     private final BoardService boardService;
+    private final CommentService commentService;
 
-    public MemberController(MemberService memberService, BoardService boardService) {
+    @Autowired
+    public MemberController(MemberService memberService, BoardService boardService, CommentService commentService) {
         this.memberService = memberService;
         this.boardService = boardService;
+        this.commentService = commentService;
     }
 
     //회원가입
@@ -70,12 +76,22 @@ public class MemberController {
     @GetMapping("/mypage/boards")
     public List<Board> myPageBoards(HttpSession session) {
         Member member = (Member) session.getAttribute("member");
-
         if (member == null) {
             throw new IllegalStateException("로그인 상태가 아닙니다.");
         }
 
         return boardService.findByMember(member); // 멤버 객체의 게시글들을 반환
     }
+
+    @GetMapping("mypage/comments")
+    public List<Comment> myPageComments(HttpSession session){
+        Member member = (Member)session.getAttribute("member");
+        if (member == null) {
+            throw new IllegalStateException("로그인 상태가 아닙니다.");
+        }
+
+        return commentService.findByMemberId(member.getId());
+    }
+
 
 }
