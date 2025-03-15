@@ -45,4 +45,9 @@ public class MemberService {
         return memberRepository.findById(id);
     }
 
+    @Transactional
+    public Member merge(Member member){
+        return memberRepository.merge(member);
+    }
+
 }
