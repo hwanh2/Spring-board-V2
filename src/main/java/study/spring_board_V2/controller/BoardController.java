@@ -47,6 +47,33 @@ public class BoardController {
         return boardService.list();
     }
 
+    @PutMapping("/update/{boardId}")
+    public Board updateBoard(HttpSession session,@PathVariable Long boardId, @RequestBody BoardForm form){
+        Member member = (Member) session.getAttribute("member");
+        if (member == null) {
+            throw new IllegalStateException("로그인 상태가 아닙니다.");
+        }
+        member = memberService.merge(member);
+
+        // 게시글 조회
+        Board board = boardService.findById(boardId);
+        if (board == null) {
+            throw new RuntimeException("게시글을 찾을 수 없습니다.");
+        }
+
+        // 로그인한 회원이 게시글 작성자인지 확인
+        if (!board.getMember().getId().equals(member.getId())) {
+            throw new RuntimeException("자신의 게시글만 수정할 수 있습니다.");
+        }
+
+        // 게시글 수정
+        board.setTitle(form.getTitle());
+        board.setContent(form.getContent());
+
+        // 수정된 게시글 저장
+        return boardService.save(board);
+    }
+
     // 게시글 삭제
     @DeleteMapping("/delete/{boardId}")
     public String deleteBoard(HttpSession session, @PathVariable Long boardId) {
