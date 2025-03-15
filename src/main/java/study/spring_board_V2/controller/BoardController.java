@@ -51,13 +51,10 @@ public class BoardController {
     @DeleteMapping("/delete/{boardId}")
     public String deleteBoard(HttpSession session, @PathVariable Long boardId) {
         Member member = (Member) session.getAttribute("member");
-        System.out.println(member);
-        if (member != null) {
-            member = memberService.findOne(member.getId());
-            if (member == null) {
-                throw new RuntimeException("Member not found");
-            }
+        if (member == null) {
+            throw new IllegalStateException("로그인 상태가 아닙니다.");
         }
+        member = memberService.merge(member);
 
         // 게시글 조회
         Board board = boardService.findById(boardId);
