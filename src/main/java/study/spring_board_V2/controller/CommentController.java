@@ -77,5 +77,32 @@ public class CommentController {
 
     }
 
+    @PutMapping("/comments/{commentId}")
+    public Comment updateComment(HttpSession session, @PathVariable Long boardId, @PathVariable Long commentId, @RequestBody CommentForm form){
+        // 로그인한 사용자 확인
+        Member member = (Member)session.getAttribute("member");
+        if (member == null) {
+            throw new IllegalStateException("로그인 상태가 아닙니다.");
+        }
+        member = memberService.merge(member);
+
+        // 댓글 조회
+        Comment comment = commentService.findById(commentId);
+        if (comment == null) {
+            throw new IllegalArgumentException("댓글을 찾을 수 없습니다.");
+        }
+
+        // 해당 댓글이 로그인한 사용자의 댓글인지 확인
+        if (!comment.getMember().getId().equals(member.getId())) {
+            throw new IllegalStateException("본인의 댓글만 수정할 수 있습니다.");
+        }
+
+        // 댓글 수정
+        comment.setContent(form.getContent());
+        commentService.save(comment);
+
+        return comment; // 수정된 댓글 반환
+    }
+
 
 }
