@@ -9,4 +9,5 @@ public interface MemberRepository {
     Member findById(long id);
     Member findByName(String name);
     List<Member> findAll();
+    Member merge(Member member);
 }
