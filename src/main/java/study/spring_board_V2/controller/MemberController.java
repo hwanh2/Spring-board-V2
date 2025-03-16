@@ -1,7 +1,9 @@
 package study.spring_board_V2.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +19,13 @@ import study.spring_board_V2.service.MemberService;
 import java.util.List;
 
 @RestController
+@Tag(name = "Member", description = "회원 관련 API")
 @RequestMapping("/members")
 public class MemberController {
     private final MemberService memberService;
     private final BoardService boardService;
     private final CommentService commentService;
+
 
     @Autowired
     public MemberController(MemberService memberService, BoardService boardService, CommentService commentService) {
@@ -30,7 +34,10 @@ public class MemberController {
         this.commentService = commentService;
     }
 
-    //회원가입
+    @Operation(summary = "회원가입", description = "새로운 사용자를 등록합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "회원가입 성공")
+    })
     @PostMapping("/signup")
     public Member signup(@RequestBody MemberForm form){
         Member member = new Member();
@@ -40,7 +47,11 @@ public class MemberController {
         return member;
     }
 
-    //로그인
+    @Operation(summary = "로그인", description = "사용자가 로그인하여 세션을 생성합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "로그인 성공"),
+            @ApiResponse(responseCode = "401", description = "잘못된 사용자 정보")
+    })
     @PostMapping("/signin")
     public Member signin(HttpSession session,@RequestBody MemberForm form){
         Member member = memberService.signin(form.getName(),form.getPassword());
@@ -48,50 +59,64 @@ public class MemberController {
         return member;
     }
 
-    //회원정보
+    @Operation(summary = "회원 정보 조회", description = "현재 로그인된 사용자의 정보를 반환합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "회원 정보 반환"),
+            @ApiResponse(responseCode = "401", description = "로그인되지 않은 사용자")
+    })
     @GetMapping("/member")
     public Member member(HttpSession session){
         Member member = (Member) session.getAttribute("member");
-
         if (member == null) {
             throw new IllegalStateException("로그인 상태가 아닙니다.");
         }
-
         return member;
     }
 
-    // 로그아웃
+    @Operation(summary = "로그아웃", description = "현재 로그인된 사용자를 로그아웃합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "로그아웃 성공")
+    })
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpSession session) {
-        session.invalidate(); // 세션 삭제
+        session.invalidate();
         return ResponseEntity.ok("로그아웃되었습니다.");
     }
 
-    //회원목록
+    @Operation(summary = "회원 목록 조회", description = "모든 회원의 목록을 반환합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "회원 목록 반환")
+    })
     @GetMapping("/list")
     public List<Member> list(){
         return memberService.findMembers();
     }
 
+    @Operation(summary = "사용자가 작성한 게시글 조회", description = "로그인한 사용자가 작성한 게시글 목록을 반환합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "게시글 목록 반환"),
+            @ApiResponse(responseCode = "401", description = "로그인되지 않은 사용자")
+    })
     @GetMapping("/mypage/boards")
     public List<Board> myPageBoards(HttpSession session) {
         Member member = (Member) session.getAttribute("member");
         if (member == null) {
             throw new IllegalStateException("로그인 상태가 아닙니다.");
         }
-
-        return boardService.findByMember(member); // 멤버 객체의 게시글들을 반환
+        return boardService.findByMember(member);
     }
 
-    @GetMapping("mypage/comments")
+    @Operation(summary = "사용자가 작성한 댓글 조회", description = "로그인한 사용자가 작성한 댓글 목록을 반환합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "댓글 목록 반환"),
+            @ApiResponse(responseCode = "401", description = "로그인되지 않은 사용자")
+    })
+    @GetMapping("/mypage/comments")
     public List<Comment> myPageComments(HttpSession session){
         Member member = (Member)session.getAttribute("member");
         if (member == null) {
             throw new IllegalStateException("로그인 상태가 아닙니다.");
         }
-
         return commentService.findByMemberId(member.getId());
     }
-
-
 }
