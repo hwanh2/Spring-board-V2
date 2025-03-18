@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,20 +20,13 @@ import study.spring_board_V2.service.MemberService;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @Tag(name = "Member", description = "회원 관련 API")
 @RequestMapping("/members")
 public class MemberController {
     private final MemberService memberService;
     private final BoardService boardService;
     private final CommentService commentService;
-
-
-    @Autowired
-    public MemberController(MemberService memberService, BoardService boardService, CommentService commentService) {
-        this.memberService = memberService;
-        this.boardService = boardService;
-        this.commentService = commentService;
-    }
 
     @Operation(summary = "회원가입", description = "새로운 사용자를 등록합니다.")
     @ApiResponses(value = {

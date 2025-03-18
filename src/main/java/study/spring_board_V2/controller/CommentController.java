@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import study.spring_board_V2.domain.Board;
@@ -19,18 +20,12 @@ import java.util.List;
 
 @RestController
 @Tag(name = "Comment", description = "댓글 관련 API")
+@RequiredArgsConstructor
 @RequestMapping("/board/{boardId}")
 public class CommentController {
     private final MemberService memberService;
     private final BoardService boardService;
     private final CommentService commentService;
-
-    @Autowired
-    public CommentController(MemberService memberService, BoardService boardService, CommentService commentService) {
-        this.memberService = memberService;
-        this.boardService = boardService;
-        this.commentService = commentService;
-    }
 
     @Operation(summary = "댓글 생성", description = "로그인한 사용자가 특정 게시글에 댓글을 작성합니다.")
     @ApiResponses({

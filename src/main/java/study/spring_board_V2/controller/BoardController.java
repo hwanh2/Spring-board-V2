@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import study.spring_board_V2.domain.Board;
@@ -16,17 +17,12 @@ import study.spring_board_V2.service.MemberService;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @Tag(name = "Board", description = "게시글 관련 API")
 @RequestMapping("/boards")
 public class BoardController {
     private final MemberService memberService;
     private final BoardService boardService;
-
-    @Autowired
-    public BoardController(MemberService memberService, BoardService boardService) {
-        this.memberService = memberService;
-        this.boardService = boardService;
-    }
 
     @Operation(summary = "게시글 생성", description = "로그인한 사용자가 게시글을 작성합니다.")
     @ApiResponses({
