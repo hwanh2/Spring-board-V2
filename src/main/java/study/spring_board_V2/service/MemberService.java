@@ -1,5 +1,6 @@
 package study.spring_board_V2.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,13 +10,9 @@ import study.spring_board_V2.repository.MemberRepository;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class MemberService {
-    MemberRepository memberRepository;
-
-    @Autowired
-    public MemberService(MemberRepository memberRepository) {
-        this.memberRepository = memberRepository;
-    }
+    private final MemberRepository memberRepository;
 
     @Transactional
     public Long join(Member member) {
