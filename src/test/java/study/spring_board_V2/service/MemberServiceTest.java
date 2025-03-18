@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import study.spring_board_V2.domain.Member;
+import study.spring_board_V2.dto.MemberForm;
 import study.spring_board_V2.repository.MemberRepository;
 
 @SpringBootTest
@@ -21,34 +22,34 @@ public class MemberServiceTest {
     @Test
     public void join() {
         // given
-        Member member = new Member();
-        member.setName("hwanhee");
-        member.setPassword("1234");
+        MemberForm form = new MemberForm();
+        form.setName("hwanhee");
+        form.setPassword("1234");
 
         // when
-        Long saveId = memberService.join(member);
+        Member savedMember = memberService.join(form); // MemberForm을 사용
 
         // then
-        Member findMember = memberService.findOne(saveId);
-        Assertions.assertThat(member.getName()).isEqualTo(findMember.getName());
+        Member findMember = memberService.findOne(savedMember.getId());
+        Assertions.assertThat(savedMember.getName()).isEqualTo(findMember.getName());
     }
 
     @Test
     public void SameNameTest() {
         // given
-        Member member1 = new Member();
-        member1.setName("test");
-        member1.setPassword("password");
+        MemberForm form1 = new MemberForm();
+        form1.setName("test");
+        form1.setPassword("password");
 
-        Member member2 = new Member();
-        member2.setName("test");
-        member2.setPassword("password");
+        MemberForm form2 = new MemberForm();
+        form2.setName("test");
+        form2.setPassword("password");
 
         // when
-        memberService.join(member1);
+        memberService.join(form1);
 
         // then
-        Assertions.assertThatThrownBy(() -> memberService.join(member2))
+        Assertions.assertThatThrownBy(() -> memberService.join(form2)) // MemberForm으로 변경
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("이미 존재하는 이름입니다.");
     }
@@ -56,12 +57,12 @@ public class MemberServiceTest {
     @Test
     public void signinTest() {
         // given
-        Member member = new Member();
-        member.setName("test");
-        member.setPassword("password");
+        MemberForm form = new MemberForm();
+        form.setName("test");
+        form.setPassword("password");
 
         // 회원가입
-        memberService.join(member);
+        memberService.join(form);
 
         // when
         Member foundMember = memberService.signin("test", "password");
@@ -74,12 +75,12 @@ public class MemberServiceTest {
     @Test
     public void signinFailTest() {
         // given
-        Member member = new Member();
-        member.setName("test");
-        member.setPassword("password");
+        MemberForm form = new MemberForm();
+        form.setName("test");
+        form.setPassword("password");
 
         // 회원가입
-        memberService.join(member);
+        memberService.join(form);
 
         // when & then
         Assertions.assertThatThrownBy(() -> memberService.signin("test", "wrongpassword"))

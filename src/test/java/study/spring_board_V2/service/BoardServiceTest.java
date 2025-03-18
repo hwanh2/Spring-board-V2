@@ -23,7 +23,7 @@ public class BoardServiceTest {
     private BoardService boardService;
 
     @Autowired
-    private JpaBoardRepository boardRepository;
+    private JpaRepository boardRepository;
 
     @Autowired
     private JpaMemberRepository memberRepository;

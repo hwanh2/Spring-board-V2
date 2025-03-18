@@ -34,11 +34,7 @@ public class MemberController {
     })
     @PostMapping("/signup")
     public Member signup(@RequestBody MemberForm form){
-        Member member = new Member();
-        member.setName(form.getName());
-        member.setPassword(form.getPassword());
-        memberService.join(member);
-        return member;
+        return memberService.join(form);
     }
 
     @Operation(summary = "로그인", description = "사용자가 로그인하여 세션을 생성합니다.")
