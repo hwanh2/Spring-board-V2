@@ -34,25 +34,14 @@ public class CommentController {
             @ApiResponse(responseCode = "401", description = "로그인되지 않음"),
             @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음")
     })
-    @PostMapping("/comments")
-    public Comment createComment(HttpSession session, @PathVariable Long boardId, @RequestBody CommentForm form){
-        Member member = (Member)session.getAttribute("member");
+    @PostMapping("/{boardId}")
+    public Comment createComment(HttpSession session, @PathVariable Long boardId, @RequestBody CommentForm form) {
+        Member member = (Member) session.getAttribute("member");
         if (member == null) {
             throw new IllegalStateException("로그인 상태가 아닙니다.");
         }
-        member = memberService.merge(member);
 
-        Board board = boardService.findById(boardId);
-        if (board == null) {
-            throw new IllegalArgumentException("존재하지 않는 게시판입니다.");
-        }
-
-        Comment comment = new Comment();
-        comment.setMember(member);
-        comment.setBoard(board);
-        comment.setContent(form.getContent());
-        commentService.save(comment);
-        return comment;
+        return commentService.createComment(member, boardId, form.getContent());
     }
 
     @Operation(summary = "게시글의 댓글 목록 조회", description = "특정 게시글에 달린 모든 댓글을 조회합니다.")
@@ -78,7 +67,6 @@ public class CommentController {
         if (member == null) {
             throw new IllegalStateException("로그인 상태가 아닙니다.");
         }
-        member = memberService.merge(member);
 
         Comment comment = commentService.findById(commentId);
         if (comment == null) {
@@ -102,24 +90,12 @@ public class CommentController {
             @ApiResponse(responseCode = "404", description = "댓글을 찾을 수 없음")
     })
     @PutMapping("/comments/{commentId}")
-    public Comment updateComment(HttpSession session, @PathVariable Long boardId, @PathVariable Long commentId, @RequestBody CommentForm form){
-        Member member = (Member)session.getAttribute("member");
+    public Comment updateComment(HttpSession session, @PathVariable Long commentId, @RequestBody CommentForm form) {
+        Member member = (Member) session.getAttribute("member");
         if (member == null) {
             throw new IllegalStateException("로그인 상태가 아닙니다.");
         }
-        member = memberService.merge(member);
 
-        Comment comment = commentService.findById(commentId);
-        if (comment == null) {
-            throw new IllegalArgumentException("댓글을 찾을 수 없습니다.");
-        }
-
-        if (!comment.getMember().getId().equals(member.getId())) {
-            throw new IllegalStateException("본인의 댓글만 수정할 수 있습니다.");
-        }
-
-        comment.setContent(form.getContent());
-        commentService.save(comment);
-        return comment;
+        return commentService.updateComment(commentId, member, form.getContent());
     }
 }

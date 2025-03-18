@@ -32,21 +32,7 @@ public class BoardController {
     })
     @PostMapping("/create")
     public Board createBoard(HttpSession session, @RequestBody BoardForm form){
-        Member member = (Member) session.getAttribute("member");
-
-        if (member != null) {
-            member = memberService.findOne(member.getId());
-            if (member == null) {
-                throw new RuntimeException("Member not found");
-            }
-        }
-
-        Board board = new Board();
-        board.setTitle(form.getTitle());
-        board.setContent(form.getContent());
-        board.setMember(member);
-
-        return boardService.save(board);
+        return boardService.createBoard(session, form); // 서비스 메서드 호출
     }
 
     @Operation(summary = "게시글 목록 조회", description = "모든 게시글을 조회합니다.")
@@ -66,26 +52,13 @@ public class BoardController {
             @ApiResponse(responseCode = "403", description = "권한 없음")
     })
     @PutMapping("/update/{boardId}")
-    public Board updateBoard(HttpSession session, @PathVariable Long boardId, @RequestBody BoardForm form){
+    public Board updateBoard(HttpSession session, @PathVariable Long boardId, @RequestBody BoardForm form) {
         Member member = (Member) session.getAttribute("member");
         if (member == null) {
             throw new IllegalStateException("로그인 상태가 아닙니다.");
         }
-        member = memberService.merge(member);
 
-        Board board = boardService.findById(boardId);
-        if (board == null) {
-            throw new RuntimeException("게시글을 찾을 수 없습니다.");
-        }
-
-        if (!board.getMember().getId().equals(member.getId())) {
-            throw new RuntimeException("자신의 게시글만 수정할 수 있습니다.");
-        }
-
-        board.setTitle(form.getTitle());
-        board.setContent(form.getContent());
-
-        return boardService.save(board);
+        return boardService.updateBoard(boardId, member.getId(), form);
     }
 
     @Operation(summary = "게시글 삭제", description = "로그인한 사용자가 본인의 게시글을 삭제합니다.")
@@ -101,7 +74,6 @@ public class BoardController {
         if (member == null) {
             throw new IllegalStateException("로그인 상태가 아닙니다.");
         }
-        member = memberService.merge(member);
 
         Board board = boardService.findById(boardId);
         if (board == null) {
