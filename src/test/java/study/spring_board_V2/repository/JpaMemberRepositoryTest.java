@@ -1,10 +1,8 @@
 package study.spring_board_V2.repository;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.Rollback;
 import study.spring_board_V2.domain.Member;
@@ -13,35 +11,27 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
-@DataJpaTest // JPA 관련 테스트에 특화된 설정 (H2 자동 연결)
+@DataJpaTest // JPA 관련 테스트 설정 (H2 자동 연결)
 class JpaMemberRepositoryTest {
 
-    @PersistenceContext
-    private EntityManager em;
-
-    private JpaMemberRepository memberRepository;
-
-    @BeforeEach
-    void setUp() {
-        memberRepository = new JpaMemberRepository(em);
-    }
+    @Autowired
+    private MemberRepository memberRepository;
 
     @AfterEach
     void tearDown() {
-        em.createQuery("DELETE FROM Member").executeUpdate(); // 테스트 후 데이터 삭제
+        memberRepository.deleteAll();
     }
 
     @Test
-    @Rollback(value = false) // 트랜잭션 자동 롤백 방지
+    @Rollback(value = false)
     void save_and_findById() {
         // given
         Member member = new Member();
         member.setName("testUser");
-        memberRepository.save(member);
-        em.flush(); // 영속성 컨텍스트 반영
+        Member savedMember = memberRepository.save(member);
 
         // when
-        Member foundMember = memberRepository.findById(member.getId());
+        Member foundMember = memberRepository.findById(savedMember.getId()).orElse(null);
 
         // then
         assertThat(foundMember).isNotNull();
@@ -54,7 +44,6 @@ class JpaMemberRepositoryTest {
         Member member = new Member();
         member.setName("duplicateName");
         memberRepository.save(member);
-        em.flush();
 
         // when
         Member foundMember = memberRepository.findByName("duplicateName");
@@ -83,7 +72,6 @@ class JpaMemberRepositoryTest {
 
         memberRepository.save(member1);
         memberRepository.save(member2);
-        em.flush();
 
         // when
         List<Member> members = memberRepository.findAll();
