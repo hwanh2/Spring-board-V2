@@ -30,7 +30,7 @@ public class BoardController {
             @ApiResponse(responseCode = "400", description = "요청 데이터 오류"),
             @ApiResponse(responseCode = "401", description = "로그인되지 않음")
     })
-    @PostMapping("/create")
+    @PostMapping
     public Board createBoard(HttpSession session, @RequestBody BoardForm form){
         return boardService.createBoard(session, form); // 서비스 메서드 호출
     }
@@ -39,7 +39,7 @@ public class BoardController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "게시글 목록 조회 성공")
     })
-    @GetMapping("/list")
+    @GetMapping
     public List<Board> list(){
         return boardService.list();
     }
@@ -51,7 +51,7 @@ public class BoardController {
             @ApiResponse(responseCode = "401", description = "로그인되지 않음"),
             @ApiResponse(responseCode = "403", description = "권한 없음")
     })
-    @PutMapping("/update/{boardId}")
+    @PutMapping("/{boardId}")
     public Board updateBoard(HttpSession session, @PathVariable Long boardId, @RequestBody BoardForm form) {
         Member member = (Member) session.getAttribute("member");
         if (member == null) {
@@ -68,7 +68,7 @@ public class BoardController {
             @ApiResponse(responseCode = "403", description = "권한 없음"),
             @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음")
     })
-    @DeleteMapping("/delete/{boardId}")
+    @DeleteMapping("/{boardId}")
     public String deleteBoard(HttpSession session, @PathVariable Long boardId) {
         Member member = (Member) session.getAttribute("member");
         if (member == null) {

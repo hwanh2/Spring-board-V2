@@ -4,9 +4,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import study.spring_board_V2.domain.Board;
 import study.spring_board_V2.domain.Comment;
@@ -26,7 +28,7 @@ public class CommentController {
     private final MemberService memberService;
     private final BoardService boardService;
     private final CommentService commentService;
-
+    private final EntityManager em;
     @Operation(summary = "댓글 생성", description = "로그인한 사용자가 특정 게시글에 댓글을 작성합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "댓글이 성공적으로 작성됨"),
@@ -34,14 +36,10 @@ public class CommentController {
             @ApiResponse(responseCode = "401", description = "로그인되지 않음"),
             @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음")
     })
-    @PostMapping("/{boardId}")
+    @Transactional
+    @PostMapping("/comments")
     public Comment createComment(HttpSession session, @PathVariable Long boardId, @RequestBody CommentForm form) {
-        Member member = (Member) session.getAttribute("member");
-        if (member == null) {
-            throw new IllegalStateException("로그인 상태가 아닙니다.");
-        }
-
-        return commentService.createComment(member, boardId, form.getContent());
+        return commentService.createComment(session,boardId,form);
     }
 
     @Operation(summary = "게시글의 댓글 목록 조회", description = "특정 게시글에 달린 모든 댓글을 조회합니다.")
@@ -49,7 +47,7 @@ public class CommentController {
             @ApiResponse(responseCode = "200", description = "댓글 목록 조회 성공"),
             @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음")
     })
-    @GetMapping("/list")
+    @GetMapping("/comments")
     public List<Comment> list(@PathVariable Long boardId){
         return commentService.findByBoardId(boardId);
     }

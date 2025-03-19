@@ -1,12 +1,17 @@
 package study.spring_board_V2.service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.json.JsonWriter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import study.spring_board_V2.domain.Board;
 import study.spring_board_V2.domain.Comment;
 import study.spring_board_V2.domain.Member;
+import study.spring_board_V2.dto.CommentForm;
 import study.spring_board_V2.repository.CommentRepository;
 
 import java.util.List;
@@ -16,10 +21,20 @@ import java.util.List;
 public class CommentService {
     private final CommentRepository commentRepository;
     private final BoardService boardService;
+    private final MemberService memberService;
 
     @Transactional
-    public Comment createComment(Member member, Long boardId, String content) {
+    public Comment createComment(HttpSession session, Long boardId, CommentForm form) {
         // 게시글 조회
+       Member member = (Member)session.getAttribute("member");
+        if (member == null) {
+            throw new IllegalStateException("로그인 상태가 아닙니다.");
+        }
+        member = memberService.findOne(member.getId());
+        if (member == null) {
+            throw new RuntimeException("Member not found");
+        }
+
         Board board = boardService.findById(boardId);
         if (board == null) {
             throw new IllegalArgumentException("존재하지 않는 게시판입니다.");
@@ -29,7 +44,7 @@ public class CommentService {
         Comment comment = new Comment();
         comment.setMember(member);
         comment.setBoard(board);
-        comment.setContent(content);
+        comment.setContent(form.getContent());
 
         return commentRepository.save(comment);
     }

@@ -2,115 +2,180 @@ package study.spring_board_V2.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 import study.spring_board_V2.domain.Board;
 import study.spring_board_V2.domain.Comment;
 import study.spring_board_V2.domain.Member;
-import study.spring_board_V2.repository.BoardRepository;
+import study.spring_board_V2.dto.CommentForm;
 import study.spring_board_V2.repository.CommentRepository;
-import study.spring_board_V2.repository.MemberRepository;
+
+import jakarta.servlet.http.HttpSession;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Optional;
 
 @SpringBootTest
-@Transactional
-class CommentServiceTest {
+public class CommentServiceTest {
 
-    @Autowired
-    private CommentService commentService;
-
-    @Autowired
+    @Mock
     private CommentRepository commentRepository;
 
-    @Autowired
-    private MemberRepository memberRepository;
+    @Mock
+    private BoardService boardService;
 
-    @Autowired
-    BoardRepository boardRepository;
+    @Mock
+    private MemberService memberService;
+
+    @Mock
+    private HttpSession session;
+
+    @InjectMocks
+    private CommentService commentService;
 
     private Member member;
     private Board board;
+    private Comment comment;
 
     @BeforeEach
     void setUp() {
-        // 테스트용 Member, Board 엔티티 생성
         member = new Member();
+        member.setId(1L);
         member.setName("testUser");
-        memberRepository.save(member);
 
         board = new Board();
-        board.setTitle("testBoard");
-        board.setContent("Test content");
+        board.setId(1L);
+        board.setTitle("Test Board");
+        board.setContent("Board content");
         board.setMember(member);
-        boardRepository.save(board);
 
-        // H2 DB에 저장될 Comment 객체 생성
-        Comment comment = new Comment();
-        comment.setContent("테스트 댓글");
+        comment = new Comment();
+        comment.setId(1L);
         comment.setMember(member);
         comment.setBoard(board);
-
-        commentService.save(comment);
+        comment.setContent("Test comment");
     }
 
     @Test
-    void 댓글저장_테스트() {
+    void createComment_Success() {
         // given
-        Comment newComment = new Comment();
-        newComment.setContent("새로운 댓글");
-        newComment.setMember(member);
-        newComment.setBoard(board);
+        Long boardId = 1L;
+        CommentForm form = new CommentForm();
+        form.setContent("New comment content");
+
+        when(session.getAttribute("member")).thenReturn(member);
+        when(memberService.findOne(member.getId())).thenReturn(member);
+        when(boardService.findById(boardId)).thenReturn(board);
+        when(commentRepository.save(any(Comment.class))).thenReturn(comment);
 
         // when
-        Comment savedComment = commentService.save(newComment);
+        Comment createdComment = commentService.createComment(session, boardId, form);
 
         // then
-        assertThat(savedComment).isNotNull();
-        assertThat(savedComment.getId()).isNotNull();
-        assertThat(savedComment.getContent()).isEqualTo("새로운 댓글");
+        assertNotNull(createdComment);
+        assertEquals("New comment content", createdComment.getContent());
+        assertEquals(member, createdComment.getMember());
+        assertEquals(board, createdComment.getBoard());
     }
 
     @Test
-    void 댓글ID로_찾기_테스트() {
+    void createComment_NoMemberInSession() {
         // given
-        List<Comment> comments = commentService.findByBoardId(board.getId());
-        Comment comment = comments.get(0);
+        Long boardId = 1L;
+        CommentForm form = new CommentForm();
+        form.setContent("New comment content");
+
+        when(session.getAttribute("member")).thenReturn(null);
+
+        // when & then
+        assertThrows(IllegalStateException.class, () -> commentService.createComment(session, boardId, form));
+    }
+
+    @Test
+    void updateComment_Success() {
+        // given
+        Long commentId = 1L;
+        String updatedContent = "Updated comment content";
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+        when(commentRepository.save(any(Comment.class))).thenReturn(comment);
 
         // when
-        Comment foundComment = commentService.findById(comment.getId());
+        Comment updatedComment = commentService.updateComment(commentId, member, updatedContent);
 
         // then
-        assertThat(foundComment).isNotNull();
-        assertThat(foundComment.getContent()).isEqualTo(comment.getContent());
+        assertNotNull(updatedComment);
+        assertEquals(updatedContent, updatedComment.getContent());
     }
 
     @Test
-    void 게시판ID로_댓글찾기_테스트() {
-        // when
-        List<Comment> comments = commentService.findByBoardId(board.getId());
-
-        // then
-        assertThat(comments).isNotEmpty();
-        assertThat(comments.get(0).getBoard().getId()).isEqualTo(board.getId());
-    }
-
-    @Test
-    void 댓글삭제_테스트() {
+    void updateComment_NotOwner() {
         // given
-        List<Comment> comments = commentService.findByBoardId(board.getId());
-        Comment comment = comments.get(0);
-        Long commentId = comment.getId();
+        Long commentId = 1L;
+        Member differentMember = new Member();
+        differentMember.setId(2L);  // 다른 사용자
+        String updatedContent = "Updated comment content";
+
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+        // when & then
+        assertThrows(IllegalStateException.class, () -> commentService.updateComment(commentId, differentMember, updatedContent));
+    }
+
+    @Test
+    void findById_Success() {
+        // given
+        Long commentId = 1L;
+        when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+        // when
+        Comment foundComment = commentService.findById(commentId);
+
+        // then
+        assertNotNull(foundComment);
+        assertEquals(commentId, foundComment.getId());
+    }
+
+    @Test
+    void findById_NotFound() {
+        // given
+        Long commentId = 1L;
+        when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThrows(IllegalArgumentException.class, () -> commentService.findById(commentId));
+    }
+
+    @Test
+    void findByBoardId_Success() {
+        // given
+        Long boardId = 1L;
+        when(commentRepository.findByBoardId(boardId)).thenReturn(List.of(comment));
+
+        // when
+        List<Comment> comments = commentService.findByBoardId(boardId);
+
+        // then
+        assertNotNull(comments);
+        assertEquals(1, comments.size());
+        assertEquals(board, comments.get(0).getBoard());
+    }
+
+    @Test
+    void deleteComment_Success() {
+        // given
+        Long commentId = 1L;
+        doNothing().when(commentRepository).deleteById(commentId);
 
         // when
         commentService.deleteComment(commentId);
-        Comment deletedComment = commentService.findById(commentId);
 
         // then
-        assertThat(deletedComment).isNull();
+        verify(commentRepository, times(1)).deleteById(commentId);
     }
 }
