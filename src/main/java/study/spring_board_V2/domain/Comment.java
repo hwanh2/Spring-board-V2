@@ -25,4 +25,10 @@ public class Comment {
     private Member member;
 
     private LocalDateTime createdAt = LocalDateTime.now();
+    public Comment(){};
+    public Comment(String content,Member member,Board board){
+        this.content = content;
+        this.member = member;
+        this.board = board;
+    }
 }
