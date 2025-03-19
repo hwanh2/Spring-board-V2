@@ -33,11 +33,7 @@ public class BoardService {
         }
 
         // 게시글 생성
-        Board board = new Board();
-        board.setTitle(form.getTitle());
-        board.setContent(form.getContent());
-        board.setMember(member);
-
+        Board board = new Board(form.getTitle(),form.getContent(),member);
         return boardRepository.save(board); // 게시글 저장
     }
 

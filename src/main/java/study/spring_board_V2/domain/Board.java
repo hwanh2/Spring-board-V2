@@ -21,4 +21,9 @@ public class Board {
     @JoinColumn(name = "member_id", referencedColumnName = "id", nullable = false)
     private Member member;
 
+    public Board(String title, String content, Member member) {
+        this.title = title;
+        this.content = content;
+        this.member = member;
+    }
 }
