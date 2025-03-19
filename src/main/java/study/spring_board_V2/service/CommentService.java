@@ -41,11 +41,7 @@ public class CommentService {
         }
 
         // 댓글 생성
-        Comment comment = new Comment();
-        comment.setMember(member);
-        comment.setBoard(board);
-        comment.setContent(form.getContent());
-
+        Comment comment = new Comment(form.getContent(),member,board);
         return commentRepository.save(comment);
     }
 
