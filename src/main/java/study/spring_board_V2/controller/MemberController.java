@@ -54,7 +54,7 @@ public class MemberController {
             @ApiResponse(responseCode = "200", description = "회원 정보 반환"),
             @ApiResponse(responseCode = "401", description = "로그인되지 않은 사용자")
     })
-    @GetMapping("/member")
+    @GetMapping("/me")
     public Member member(HttpSession session){
         Member member = (Member) session.getAttribute("member");
         if (member == null) {
